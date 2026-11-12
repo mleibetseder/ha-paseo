@@ -1,0 +1,13 @@
+{
+  "domain": "paseo",
+  "name": "Paseo",
+  "codeowners": ["@mleibetseder"],
+  "config_flow": true,
+  "dependencies": ["webhook"],
+  "documentation": "https://github.com/mleibetseder/ha-paseo",
+  "integration_type": "device",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/mleibetseder/ha-paseo/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}

@@ -1,0 +1,88 @@
+{
+  "entity": {
+    "binary_sensor": {
+      "bridge_online": {
+        "default": "mdi:lan-disconnect",
+        "state": {
+          "on": "mdi:lan-connect"
+        }
+      },
+      "needs_attention": {
+        "default": "mdi:check-circle-outline",
+        "state": {
+          "on": "mdi:alert-circle-outline"
+        }
+      },
+      "agent_working": {
+        "default": "mdi:robot-outline",
+        "state": {
+          "on": "mdi:robot-happy"
+        }
+      }
+    },
+    "sensor": {
+      "last_push": {
+        "default": "mdi:clock-check-outline"
+      },
+      "active_agents": {
+        "default": "mdi:robot"
+      },
+      "current_activity": {
+        "default": "mdi:text-box-outline"
+      },
+      "active_ticket": {
+        "default": "mdi:ticket-outline"
+      },
+      "run_progress": {
+        "default": "mdi:progress-check"
+      },
+      "raw_eta": {
+        "default": "mdi:timer-sand"
+      },
+      "calibrated_eta": {
+        "default": "mdi:timer-check-outline"
+      },
+      "calibrated_finish": {
+        "default": "mdi:flag-checkered"
+      },
+      "deliverables_count": {
+        "default": "mdi:package-variant-closed"
+      },
+      "open_questions": {
+        "default": "mdi:comment-question-outline"
+      },
+      "projects_overview": {
+        "default": "mdi:folder-multiple-outline"
+      },
+      "quota_waiting": {
+        "default": "mdi:gauge-empty"
+      },
+      "held_questions": {
+        "default": "mdi:bell-sleep-outline"
+      },
+      "ci_queue": {
+        "default": "mdi:server-network",
+        "state": {
+          "idle": "mdi:sleep",
+          "running": "mdi:play-circle-outline",
+          "queued": "mdi:timer-sand",
+          "blocked": "mdi:block-helper"
+        }
+      }
+    }
+  },
+  "services": {
+    "resume_quota_agent": {
+      "service": "mdi:play-speed"
+    },
+    "answer_question": {
+      "service": "mdi:comment-check-outline"
+    },
+    "get_morning_brief": {
+      "service": "mdi:weather-sunset-up"
+    },
+    "cancel_ci_run": {
+      "service": "mdi:cancel"
+    }
+  }
+}

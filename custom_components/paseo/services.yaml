@@ -1,0 +1,64 @@
+answer_question:
+  fields:
+    worktree:
+      required: true
+      example: myproject-1a2b3c4d
+      selector:
+        text:
+    question_id:
+      required: true
+      example: Q1
+      selector:
+        text:
+    choice:
+      required: true
+      example: B
+      selector:
+        text:
+    fingerprint:
+      required: false
+      example: a1b2c3d4
+      selector:
+        text:
+    words:
+      required: false
+      selector:
+        text:
+          multiline: true
+    config_entry_id:
+      required: false
+      selector:
+        config_entry:
+          integration: paseo
+resume_quota_agent:
+  fields:
+    agent_id:
+      required: false
+      default: all
+      example: all
+      selector:
+        text:
+    config_entry_id:
+      required: false
+      selector:
+        config_entry:
+          integration: paseo
+get_morning_brief:
+  fields:
+    config_entry_id:
+      required: false
+      selector:
+        config_entry:
+          integration: paseo
+cancel_ci_run:
+  fields:
+    run_id:
+      required: true
+      example: demo-run-1
+      selector:
+        text:
+    config_entry_id:
+      required: false
+      selector:
+        config_entry:
+          integration: paseo

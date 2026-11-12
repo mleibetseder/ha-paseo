@@ -1,0 +1,49 @@
+rules:
+  # Bronze
+  action-setup: done
+  appropriate-polling:
+    status: done
+    comment: No polling; the plugin pushes to a webhook and the coordinator has no update interval.
+  brands:
+    status: todo
+    comment: No brand images yet.
+  common-modules: done
+  config-flow-test-coverage: done
+  config-flow: done
+  dependency-transparency:
+    status: exempt
+    comment: No third-party requirements (requirements is empty).
+  docs-actions: done
+  docs-high-level-description: done
+  docs-installation-instructions: done
+  docs-removal-instructions: done
+  entity-event-setup: done
+  entity-unique-id: done
+  has-entity-name: done
+  runtime-data: done
+  test-before-configure: done
+  test-before-setup:
+    status: exempt
+    comment: >-
+      A rejected token raises ConfigEntryAuthFailed, but an unreachable plugin does not block setup
+      on purpose, because the entities wait for the plugin's pushes.
+  unique-config-entry: done
+  # Silver
+  action-exceptions: done
+  config-entry-unloading: done
+  docs-configuration-parameters: done
+  docs-installation-parameters: done
+  entity-unavailable: done
+  integration-owner: done
+  log-when-unavailable:
+    status: done
+    comment: The coordinator logs once when the bridge goes stale and once when its pushes resume.
+  parallel-updates: done
+  reauthentication-flow: done
+  test-coverage: done
+  # Gold, only what is implemented
+  diagnostics: done
+  entity-translations: done
+  exception-translations: done
+  icon-translations: done
+  reconfiguration-flow: done

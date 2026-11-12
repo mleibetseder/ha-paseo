@@ -1,0 +1,296 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Pair with Paseo",
+        "description": "Enter the address of the Paseo hass-bridge plugin and its bridge token (PASEO_BRIDGE_TOKEN). Home Assistant registers its own webhook with the plugin; nothing else needs to be copied.",
+        "data": {
+          "url": "Plugin URL",
+          "token": "Bridge token"
+        },
+        "data_description": {
+          "url": "For example http://paseo-host:7421",
+          "token": "The value of PASEO_BRIDGE_TOKEN on the Paseo host."
+        }
+      },
+      "reconfigure": {
+        "title": "Reconfigure Paseo",
+        "description": "Change the plugin address or token. The same Paseo instance must answer.",
+        "data": {
+          "url": "Plugin URL",
+          "token": "Bridge token"
+        },
+        "data_description": {
+          "url": "For example http://paseo-host:7421",
+          "token": "The value of PASEO_BRIDGE_TOKEN on the Paseo host."
+        }
+      },
+      "reauth_confirm": {
+        "title": "Paseo needs a new token",
+        "description": "The plugin rejected the stored bridge token. Enter the current PASEO_BRIDGE_TOKEN.",
+        "data": {
+          "token": "Bridge token"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect",
+      "invalid_auth": "Invalid authentication",
+      "unsupported_schema": "The plugin speaks a contract version this integration does not support. Update both.",
+      "no_internal_url": "Home Assistant has no internal URL. Set one under Settings, System, Network."
+    },
+    "abort": {
+      "already_configured": "Device is already configured",
+      "wrong_device": "This is a different Paseo instance than the one configured.",
+      "reauth_successful": "Re-authentication was successful",
+      "reconfigure_successful": "Re-configuration was successful"
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "bridge_online": {
+        "name": "Bridge online"
+      },
+      "needs_attention": {
+        "name": "Needs attention"
+      },
+      "agent_working": {
+        "name": "Agent working"
+      }
+    },
+    "sensor": {
+      "last_push": {
+        "name": "Last push"
+      },
+      "active_agents": {
+        "name": "Active agents"
+      },
+      "current_activity": {
+        "name": "Current activity"
+      },
+      "active_ticket": {
+        "name": "Active ticket"
+      },
+      "run_progress": {
+        "name": "Run progress"
+      },
+      "raw_eta": {
+        "name": "Raw ETA"
+      },
+      "calibrated_eta": {
+        "name": "Calibrated ETA"
+      },
+      "calibrated_finish": {
+        "name": "Calibrated finish"
+      },
+      "deliverables_count": {
+        "name": "Deliverables"
+      },
+      "open_questions": {
+        "name": "Open questions"
+      },
+      "projects_overview": {
+        "name": "Projects overview"
+      },
+      "quota_waiting": {
+        "name": "Quota waiting"
+      },
+      "held_questions": {
+        "name": "Held questions"
+      },
+      "ci_queue": {
+        "name": "CI queue",
+        "state": {
+          "idle": "Idle",
+          "running": "Running",
+          "queued": "Queued",
+          "blocked": "Blocked"
+        },
+        "state_attributes": {
+          "gate": {
+            "name": "Active gate"
+          },
+          "eta_finish": {
+            "name": "Expected finish"
+          },
+          "minutes_left": {
+            "name": "Actions minutes left"
+          },
+          "rows": {
+            "name": "Runs"
+          }
+        }
+      }
+    }
+  },
+  "services": {
+    "resume_quota_agent": {
+      "name": "Resume quota agent",
+      "description": "Asks usage-auto-resume to resume a rate-limited agent now, the same as Resume now in the Paseo app. It runs its own checks and either sends the continue, refuses and leaves the job unchanged (for example while usage is still used up), or removes the job (it is cancelled, or sending it failed). It never reschedules. The response lists the outcome per agent.",
+      "fields": {
+        "agent_id": {
+          "name": "Agent ID",
+          "description": "The agent to resume, or \"all\" for every agent that waits for its quota."
+        },
+        "config_entry_id": {
+          "name": "Paseo entry",
+          "description": "The Paseo entry to use. Only needed when more than one is configured."
+        }
+      }
+    },
+    "answer_question": {
+      "name": "Answer question",
+      "description": "Answers an open Paseo question the way the Progress panel does: records the answer in the progress file and tells the agent that asked.",
+      "fields": {
+        "worktree": {
+          "name": "Worktree",
+          "description": "The worktree key of the question, such as myproject-1a2b3c4d (the key of the open question in the push)."
+        },
+        "question_id": {
+          "name": "Question ID",
+          "description": "The question to answer, such as Q1."
+        },
+        "choice": {
+          "name": "Choice",
+          "description": "The letter of the option you pick."
+        },
+        "words": {
+          "name": "Your words",
+          "description": "Optional text quoted under the answer, up to 2000 characters."
+        },
+        "config_entry_id": {
+          "name": "Paseo entry",
+          "description": "The Paseo entry to use. Only needed when more than one is configured."
+        },
+        "fingerprint": {
+          "name": "Fingerprint",
+          "description": "Optional: the 8-character fingerprint of the question you saw. The answer is refused when the question under that id has changed since."
+        }
+      }
+    },
+    "get_morning_brief": {
+      "name": "Get morning brief",
+      "description": "Returns the questions held during bedtime and the open blocking ones, with a ready-made text line for a morning announcement.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Paseo entry",
+          "description": "The Paseo entry to use. Only needed when more than one is configured."
+        }
+      }
+    },
+    "cancel_ci_run": {
+      "name": "Cancel CI run",
+      "description": "Cancels a queued or running run of the Paseo CI plugin: the plugin writes the cancel marker and the CI plugin stops the run within a few seconds. A marker for a run while the CI plugin is stopped is acted on when it starts again. Finished and unknown runs are refused.",
+      "fields": {
+        "run_id": {
+          "name": "Run ID",
+          "description": "The run to cancel, such as demo-run-1 (the id of a row in the CI queue sensor)."
+        },
+        "config_entry_id": {
+          "name": "Paseo entry",
+          "description": "The Paseo entry to use. Only needed when more than one is configured."
+        }
+      }
+    }
+  },
+  "exceptions": {
+    "no_matching_job": {
+      "message": "No waiting agent matches {agent_id}. Only agents that wait for their quota and are switched on can be resumed."
+    },
+    "cannot_connect": {
+      "message": "Cannot reach the Paseo plugin."
+    },
+    "auth_failed": {
+      "message": "The Paseo plugin rejected the bridge token. Reauthenticate the integration."
+    },
+    "entry_not_found": {
+      "message": "{entry_id} is not a Paseo entry."
+    },
+    "entry_not_loaded": {
+      "message": "No Paseo entry is loaded."
+    },
+    "entry_required": {
+      "message": "More than one Paseo entry is loaded. Choose one with config_entry_id."
+    },
+    "daemon_unavailable": {
+      "message": "The Paseo plugin cannot reach the Paseo daemon ({reason}), so usage-auto-resume was not asked."
+    },
+    "rpc_failed": {
+      "message": "usage-auto-resume did not answer the resume request."
+    },
+    "invalid_choice": {
+      "message": "That letter is not one of the question's options."
+    },
+    "invalid_words": {
+      "message": "Your words are longer than 2000 characters."
+    },
+    "unknown_worktree": {
+      "message": "The plugin does not know that worktree."
+    },
+    "unknown_question": {
+      "message": "That question is not open in the latest run of the worktree."
+    },
+    "already_answered": {
+      "message": "That question was answered already."
+    },
+    "answer_in_progress": {
+      "message": "The Progress panel is sending an answer for that question right now. Try again in a moment."
+    },
+    "answer_rejected": {
+      "message": "The Paseo plugin refused the answer."
+    },
+    "answer_agent_unreachable": {
+      "message": "The agent could not be reached, so the answer was not recorded. Try again."
+    },
+    "answer_daemon_unavailable": {
+      "message": "The plugin has no connection to the Paseo daemon, so the answer was not recorded. Try again in a moment."
+    },
+    "answers_off": {
+      "message": "Answering is switched off in the Progress plugin's settings."
+    },
+    "question_changed": {
+      "message": "That question changed since you saw it (a new run reused its id). Look at the current question and answer that."
+    },
+    "unknown_run": {
+      "message": "The CI plugin has no run {run_id}."
+    },
+    "run_finished": {
+      "message": "Run {run_id} has already finished and cannot be cancelled."
+    },
+    "cancel_rejected": {
+      "message": "The Paseo plugin refused to cancel run {run_id}."
+    },
+    "plugin_error": {
+      "message": "The Paseo plugin failed to handle the request. Check its log."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Question notifications",
+        "description": "Which phones get the question pushes, and when to stay quiet.",
+        "data": {
+          "notify_targets": "Phones to notify",
+          "bedtime_entity": "Bedtime entity",
+          "reminder_minutes": "Reminder after (minutes)",
+          "quiet_hold": "While bedtime is on"
+        },
+        "data_description": {
+          "notify_targets": "The notify.mobile_app_* services of your phones. Re-open this page if a phone was registered again.",
+          "bedtime_entity": "When this entity is on, questions are held as set below and no reminder is sent. Leave empty to use input_boolean.bedtime if it exists.",
+          "reminder_minutes": "Send one reminder when a blocking question is still open after this many minutes. 0 turns reminders off.",
+          "quiet_hold": "Held questions raise no push; they stay in the held list and the morning brief until they are answered."
+        }
+      }
+    }
+  },
+  "selector": {
+    "quiet_hold": {
+      "options": {
+        "hold_non_blocking": "Hold questions that do not block the agent",
+        "hold_all": "Hold all questions",
+        "never": "Never hold"
+      }
+    }
+  }
+}

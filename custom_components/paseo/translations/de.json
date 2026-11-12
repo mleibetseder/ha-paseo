@@ -1,0 +1,296 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Mit Paseo koppeln",
+        "description": "Gib die Adresse des Paseo-hass-bridge-Plugins und sein Bridge-Token (PASEO_BRIDGE_TOKEN) ein. Home Assistant registriert seinen eigenen Webhook beim Plugin, du musst sonst nichts kopieren.",
+        "data": {
+          "url": "Plugin-URL",
+          "token": "Bridge-Token"
+        },
+        "data_description": {
+          "url": "Zum Beispiel http://paseo-host:7421",
+          "token": "Der Wert von PASEO_BRIDGE_TOKEN auf dem Paseo-Host."
+        }
+      },
+      "reconfigure": {
+        "title": "Paseo neu konfigurieren",
+        "description": "Ändere die Plugin-Adresse oder das Token. Es muss dieselbe Paseo-Instanz antworten.",
+        "data": {
+          "url": "Plugin-URL",
+          "token": "Bridge-Token"
+        },
+        "data_description": {
+          "url": "Zum Beispiel http://paseo-host:7421",
+          "token": "Der Wert von PASEO_BRIDGE_TOKEN auf dem Paseo-Host."
+        }
+      },
+      "reauth_confirm": {
+        "title": "Paseo braucht ein neues Token",
+        "description": "Das Plugin hat das gespeicherte Bridge-Token abgelehnt. Gib das aktuelle PASEO_BRIDGE_TOKEN ein.",
+        "data": {
+          "token": "Bridge-Token"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Verbindung fehlgeschlagen",
+      "invalid_auth": "Ungültige Authentifizierung",
+      "unsupported_schema": "Das Plugin spricht eine Vertragsversion, die diese Integration nicht unterstützt. Aktualisiere beide.",
+      "no_internal_url": "Home Assistant hat keine interne URL. Lege eine unter Einstellungen, System, Netzwerk fest."
+    },
+    "abort": {
+      "already_configured": "Gerät ist bereits konfiguriert",
+      "wrong_device": "Das ist eine andere Paseo-Instanz als die konfigurierte.",
+      "reauth_successful": "Die erneute Authentifizierung war erfolgreich",
+      "reconfigure_successful": "Die Neukonfiguration war erfolgreich"
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "bridge_online": {
+        "name": "Bridge online"
+      },
+      "needs_attention": {
+        "name": "Braucht Aufmerksamkeit"
+      },
+      "agent_working": {
+        "name": "Agent arbeitet"
+      }
+    },
+    "sensor": {
+      "last_push": {
+        "name": "Letzter Push"
+      },
+      "active_agents": {
+        "name": "Aktive Agenten"
+      },
+      "current_activity": {
+        "name": "Aktuelle Aktivität"
+      },
+      "active_ticket": {
+        "name": "Aktives Ticket"
+      },
+      "run_progress": {
+        "name": "Lauf-Fortschritt"
+      },
+      "raw_eta": {
+        "name": "Rohe Restzeit"
+      },
+      "calibrated_eta": {
+        "name": "Kalibrierte Restzeit"
+      },
+      "calibrated_finish": {
+        "name": "Kalibrierte Fertigstellung"
+      },
+      "deliverables_count": {
+        "name": "Ergebnisse"
+      },
+      "open_questions": {
+        "name": "Offene Fragen"
+      },
+      "projects_overview": {
+        "name": "Projektübersicht"
+      },
+      "quota_waiting": {
+        "name": "Wartet auf Kontingent"
+      },
+      "held_questions": {
+        "name": "Zurückgehaltene Fragen"
+      },
+      "ci_queue": {
+        "name": "CI-Warteschlange",
+        "state": {
+          "idle": "Leerlauf",
+          "running": "Läuft",
+          "queued": "Eingereiht",
+          "blocked": "Blockiert"
+        },
+        "state_attributes": {
+          "gate": {
+            "name": "Aktives Gate"
+          },
+          "eta_finish": {
+            "name": "Voraussichtliches Ende"
+          },
+          "minutes_left": {
+            "name": "Verbleibende Actions-Minuten"
+          },
+          "rows": {
+            "name": "Läufe"
+          }
+        }
+      }
+    }
+  },
+  "services": {
+    "resume_quota_agent": {
+      "name": "Kontingent-Agent fortsetzen",
+      "description": "Bittet usage-auto-resume, einen ratenbegrenzten Agenten jetzt fortzusetzen, genau wie „Jetzt fortsetzen“ in der Paseo-App. Das Plugin führt seine eigenen Prüfungen aus und sendet entweder das Weitermachen, lehnt ab und lässt den Job unverändert (zum Beispiel solange das Kontingent noch aufgebraucht ist) oder entfernt den Job (er wird abgebrochen, oder das Senden ist fehlgeschlagen). Es plant nie neu. Die Antwort listet das Ergebnis pro Agent.",
+      "fields": {
+        "agent_id": {
+          "name": "Agent-ID",
+          "description": "Der Agent, der fortgesetzt werden soll, oder „all“ für jeden Agenten, der auf sein Kontingent wartet."
+        },
+        "config_entry_id": {
+          "name": "Paseo-Eintrag",
+          "description": "Der zu verwendende Paseo-Eintrag. Nur nötig, wenn mehr als einer konfiguriert ist."
+        }
+      }
+    },
+    "answer_question": {
+      "name": "Frage beantworten",
+      "description": "Beantwortet eine offene Paseo-Frage so wie das Progress-Panel: Die Antwort wird in der Progress-Datei festgehalten und der fragende Agent wird informiert.",
+      "fields": {
+        "worktree": {
+          "name": "Worktree",
+          "description": "Der Worktree-Schlüssel der Frage, zum Beispiel myproject-1a2b3c4d (der Schlüssel der offenen Frage im Push)."
+        },
+        "question_id": {
+          "name": "Fragen-ID",
+          "description": "Die Frage, die beantwortet werden soll, zum Beispiel Q1."
+        },
+        "choice": {
+          "name": "Auswahl",
+          "description": "Der Buchstabe der Option, die du wählst."
+        },
+        "words": {
+          "name": "Deine Worte",
+          "description": "Optionaler Text, der unter der Antwort zitiert wird, bis zu 2000 Zeichen."
+        },
+        "config_entry_id": {
+          "name": "Paseo-Eintrag",
+          "description": "Der zu verwendende Paseo-Eintrag. Nur nötig, wenn mehr als einer konfiguriert ist."
+        },
+        "fingerprint": {
+          "name": "Fingerabdruck",
+          "description": "Optional: der 8-stellige Fingerabdruck der Frage, die du gesehen hast. Die Antwort wird abgelehnt, wenn sich die Frage unter dieser ID seither geändert hat."
+        }
+      }
+    },
+    "get_morning_brief": {
+      "name": "Morgenbericht abrufen",
+      "description": "Liefert die Fragen, die während der Schlafenszeit zurückgehalten wurden, und die offenen blockierenden Fragen, mit einer fertigen Textzeile für eine Morgenansage.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Paseo-Eintrag",
+          "description": "Der zu verwendende Paseo-Eintrag. Nur nötig, wenn mehr als einer konfiguriert ist."
+        }
+      }
+    },
+    "cancel_ci_run": {
+      "name": "CI-Lauf abbrechen",
+      "description": "Bricht einen eingereihten oder laufenden Lauf des Paseo-CI-Plugins ab: Das Plugin schreibt die Abbruchmarkierung und das CI-Plugin stoppt den Lauf innerhalb weniger Sekunden. Eine Markierung für einen Lauf, während das CI-Plugin gestoppt ist, wird beim nächsten Start umgesetzt. Beendete und unbekannte Läufe werden abgelehnt.",
+      "fields": {
+        "run_id": {
+          "name": "Lauf-ID",
+          "description": "Der Lauf, der abgebrochen werden soll, zum Beispiel demo-run-1 (die ID einer Zeile im CI-Warteschlangen-Sensor)."
+        },
+        "config_entry_id": {
+          "name": "Paseo-Eintrag",
+          "description": "Der zu verwendende Paseo-Eintrag. Nur nötig, wenn mehr als einer konfiguriert ist."
+        }
+      }
+    }
+  },
+  "exceptions": {
+    "no_matching_job": {
+      "message": "Kein wartender Agent passt zu {agent_id}. Nur Agenten, die auf ihr Kontingent warten und eingeschaltet sind, können fortgesetzt werden."
+    },
+    "cannot_connect": {
+      "message": "Das Paseo-Plugin ist nicht erreichbar."
+    },
+    "auth_failed": {
+      "message": "Das Paseo-Plugin hat das Bridge-Token abgelehnt. Authentifiziere die Integration erneut."
+    },
+    "entry_not_found": {
+      "message": "{entry_id} ist kein Paseo-Eintrag."
+    },
+    "entry_not_loaded": {
+      "message": "Es ist kein Paseo-Eintrag geladen."
+    },
+    "entry_required": {
+      "message": "Es sind mehrere Paseo-Einträge geladen. Wähle einen mit config_entry_id."
+    },
+    "daemon_unavailable": {
+      "message": "Das Paseo-Plugin erreicht den Paseo-Daemon nicht ({reason}), daher wurde usage-auto-resume nicht gefragt."
+    },
+    "rpc_failed": {
+      "message": "usage-auto-resume hat die Anfrage zum Fortsetzen nicht beantwortet."
+    },
+    "invalid_choice": {
+      "message": "Dieser Buchstabe gehört zu keiner Option der Frage."
+    },
+    "invalid_words": {
+      "message": "Deine Worte sind länger als 2000 Zeichen."
+    },
+    "unknown_worktree": {
+      "message": "Das Plugin kennt diesen Worktree nicht."
+    },
+    "unknown_question": {
+      "message": "Diese Frage ist im letzten Lauf des Worktrees nicht offen."
+    },
+    "already_answered": {
+      "message": "Diese Frage wurde bereits beantwortet."
+    },
+    "answer_in_progress": {
+      "message": "Das Progress-Panel sendet gerade eine Antwort auf diese Frage. Versuche es gleich noch einmal."
+    },
+    "answer_rejected": {
+      "message": "Das Paseo-Plugin hat die Antwort abgelehnt."
+    },
+    "answer_agent_unreachable": {
+      "message": "Der Agent war nicht erreichbar, daher wurde die Antwort nicht festgehalten. Versuche es noch einmal."
+    },
+    "answer_daemon_unavailable": {
+      "message": "Das Plugin hat keine Verbindung zum Paseo-Daemon, daher wurde die Antwort nicht festgehalten. Versuche es gleich noch einmal."
+    },
+    "answers_off": {
+      "message": "Das Antworten ist in den Einstellungen des Progress-Plugins ausgeschaltet."
+    },
+    "question_changed": {
+      "message": "Die Frage hat sich geändert, seit du sie gesehen hast (ein neuer Lauf hat ihre ID wiederverwendet). Sieh dir die aktuelle Frage an und beantworte sie."
+    },
+    "unknown_run": {
+      "message": "Das CI-Plugin kennt den Lauf {run_id} nicht."
+    },
+    "run_finished": {
+      "message": "Lauf {run_id} ist bereits beendet und kann nicht abgebrochen werden."
+    },
+    "cancel_rejected": {
+      "message": "Das Paseo-Plugin hat den Abbruch von Lauf {run_id} abgelehnt."
+    },
+    "plugin_error": {
+      "message": "Das Paseo-Plugin konnte die Anfrage nicht verarbeiten. Sieh in seinem Log nach."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Benachrichtigungen zu Fragen",
+        "description": "Welche Handys die Frage-Pushes bekommen und wann Ruhe herrscht.",
+        "data": {
+          "notify_targets": "Handys zum Benachrichtigen",
+          "bedtime_entity": "Schlafenszeit-Entität",
+          "reminder_minutes": "Erinnerung nach (Minuten)",
+          "quiet_hold": "Solange Schlafenszeit aktiv ist"
+        },
+        "data_description": {
+          "notify_targets": "Die notify.mobile_app_*-Aktionen deiner Handys. Öffne diese Seite erneut, wenn ein Handy neu registriert wurde.",
+          "bedtime_entity": "Ist diese Entität eingeschaltet, werden Fragen wie unten eingestellt zurückgehalten und es wird keine Erinnerung gesendet. Leer lassen, um input_boolean.bedtime zu verwenden, falls vorhanden.",
+          "reminder_minutes": "Sende eine Erinnerung, wenn eine blockierende Frage nach dieser Zeit noch offen ist. 0 schaltet Erinnerungen aus.",
+          "quiet_hold": "Zurückgehaltene Fragen lösen keinen Push aus; sie bleiben in der Liste der zurückgehaltenen Fragen und im Morgenbericht, bis sie beantwortet sind."
+        }
+      }
+    }
+  },
+  "selector": {
+    "quiet_hold": {
+      "options": {
+        "hold_non_blocking": "Fragen zurückhalten, die den Agenten nicht blockieren",
+        "hold_all": "Alle Fragen zurückhalten",
+        "never": "Nie zurückhalten"
+      }
+    }
+  }
+}
