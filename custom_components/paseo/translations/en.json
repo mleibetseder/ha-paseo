@@ -56,6 +56,9 @@
       },
       "agent_working": {
         "name": "Agent working"
+      },
+      "project_working": {
+        "name": "Working"
       }
     },
     "sensor": {
@@ -120,6 +123,30 @@
             "name": "Runs"
           }
         }
+      },
+      "project_progress": {
+        "name": "Progress"
+      },
+      "project_calibrated_eta": {
+        "name": "Calibrated ETA"
+      },
+      "project_calibrated_finish": {
+        "name": "Calibrated finish"
+      },
+      "project_active_ticket": {
+        "name": "Active ticket"
+      },
+      "project_open_questions": {
+        "name": "Open questions"
+      },
+      "project_stuck": {
+        "name": "Stuck"
+      },
+      "project_deliverables": {
+        "name": "Deliverables"
+      },
+      "project_last_update": {
+        "name": "Last update"
       }
     }
   },
@@ -291,6 +318,11 @@
         "hold_all": "Hold all questions",
         "never": "Never hold"
       }
+    }
+  },
+  "device": {
+    "project": {
+      "name": "Paseo {worktree}"
     }
   }
 }

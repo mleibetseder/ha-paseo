@@ -56,6 +56,9 @@
       },
       "agent_working": {
         "name": "Agent arbeitet"
+      },
+      "project_working": {
+        "name": "Arbeitet"
       }
     },
     "sensor": {
@@ -120,6 +123,30 @@
             "name": "Läufe"
           }
         }
+      },
+      "project_progress": {
+        "name": "Fortschritt"
+      },
+      "project_calibrated_eta": {
+        "name": "Kalibrierte Restzeit"
+      },
+      "project_calibrated_finish": {
+        "name": "Kalibrierte Fertigstellung"
+      },
+      "project_active_ticket": {
+        "name": "Aktives Ticket"
+      },
+      "project_open_questions": {
+        "name": "Offene Fragen"
+      },
+      "project_stuck": {
+        "name": "Hängend"
+      },
+      "project_deliverables": {
+        "name": "Ergebnisse"
+      },
+      "project_last_update": {
+        "name": "Letzte Aktualisierung"
       }
     }
   },
@@ -291,6 +318,11 @@
         "hold_all": "Alle Fragen zurückhalten",
         "never": "Nie zurückhalten"
       }
+    }
+  },
+  "device": {
+    "project": {
+      "name": "Paseo {worktree}"
     }
   }
 }

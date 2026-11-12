@@ -11,14 +11,17 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.device_registry import DeviceEntry
 from homeassistant.helpers.network import NoURLAvailableError
 from homeassistant.helpers.storage import Store
 from homeassistant.helpers.typing import ConfigType
 
+from . import payload
 from .actions import async_listen_for_actions
 from .api import PaseoAuthError, PaseoBridgeClient, PaseoError
 from .const import CONF_TOKEN, CONF_URL, CONF_WEBHOOK_ID, DOMAIN
 from .coordinator import PaseoCoordinator
+from .entity import run_device_identifier
 from .notifier import STORE_VERSION, QuestionNotifier
 from .services import async_setup_services
 from .webhook import (
@@ -104,3 +107,19 @@ async def async_remove_entry(hass: HomeAssistant, entry: PaseoConfigEntry) -> No
 async def async_unload_entry(hass: HomeAssistant, entry: PaseoConfigEntry) -> bool:
     """Unload a Paseo config entry; the webhook and the timer go with it."""
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+
+
+async def async_remove_config_entry_device(
+    hass: HomeAssistant, entry: PaseoConfigEntry, device_entry: DeviceEntry
+) -> bool:
+    """Allow deleting a run's device once its key is no longer in the payload; never the hub."""
+    coordinator = getattr(entry, "runtime_data", None)
+    live = {
+        run_device_identifier(entry.unique_id or "", key)
+        for key in payload.run_keys(coordinator.data if coordinator else None)
+    }
+    prefix = f"{entry.unique_id or ''}_"
+    return any(
+        domain == DOMAIN and identifier.startswith(prefix) and identifier not in live
+        for domain, identifier in device_entry.identifiers
+    )

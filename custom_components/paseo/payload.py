@@ -51,6 +51,71 @@ def runs(data: Mapping[str, Any] | None) -> list[dict[str, Any]]:
     return _dicts((data or {}).get("runs"))
 
 
+def run_view(data: Mapping[str, Any] | None, key: str) -> dict[str, Any] | None:
+    """One run shaped like the aggregate payload, so the aggregate readers work on it.
+
+    `runs` holds the run alone, `eta` is the run itself (it has the same field names) and `overview`
+    holds its overview entry when there is one. None when no run has this key.
+    """
+    for run in runs(data):
+        if run.get("key") == key:
+            entries = [o for o in _dicts((data or {}).get("overview")) if o.get("key") == key]
+            return {"runs": [run], "eta": run, "overview": entries[:1]}
+    return None
+
+
+def run_of(view: Mapping[str, Any]) -> dict[str, Any]:
+    """The run inside a run view."""
+    return view["runs"][0]
+
+
+def worktree(data: Mapping[str, Any] | None, key: str) -> str:
+    """The display name of a run (its worktree folder); the key when there is none."""
+    view = run_view(data, key)
+    name = run_of(view).get("worktree") if view else None
+    return name if isinstance(name, str) and name else key
+
+
+def run_keys(data: Mapping[str, Any] | None) -> list[str]:
+    """The keys of the runs in the payload, in payload order, without duplicates."""
+    keys: list[str] = []
+    for run in runs(data):
+        key = run.get("key")
+        if isinstance(key, str) and key and key not in keys:
+            keys.append(key)
+    return keys
+
+
+def run_count(view: Mapping[str, Any], field: str) -> int:
+    """open_questions or stuck of a run view: the overview's real count, else the listed ones."""
+    run = view["runs"][0]
+    listed = run.get(field)
+    fallback = len(listed) if isinstance(listed, list) else 0
+    entry = _dicts(view.get("overview"))
+    return _count(entry[0].get(field), fallback) if entry else fallback
+
+
+def run_listed(view: Mapping[str, Any], field: str) -> list[Any]:
+    """The ids (open_questions) or stuck items of a run view, bounded."""
+    listed = view["runs"][0].get(field)
+    return listed[:MAX_ATTRIBUTE_ITEMS] if isinstance(listed, list) else []
+
+
+def run_working(view: Mapping[str, Any]) -> bool:
+    """The run's working flag, from the run itself or its overview entry; off when neither carries it."""
+    for source in (view["runs"][0], *_dicts(view.get("overview"))):
+        if isinstance(source.get("working"), bool):
+            return source["working"]
+    return False
+
+
+def run_last_update(view: Mapping[str, Any]) -> datetime | None:
+    """The time of the run's last progress event, aware, in Home Assistant's time zone."""
+    value = view["runs"][0].get("last_update")
+    parsed = dt_util.parse_datetime(value) if isinstance(value, str) else None
+    return dt_util.as_local(parsed) if parsed is not None and parsed.tzinfo is not None else None
+
+
 def active_ticket(data: Mapping[str, Any] | None) -> dict[str, Any] | None:
     """The working ticket of the first (most recently updated) run that has one, with its worktree."""
     for run in runs(data):

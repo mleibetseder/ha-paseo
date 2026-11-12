@@ -14,12 +14,12 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.const import PERCENTAGE, EntityCategory, UnitOfTime
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import PaseoConfigEntry, payload
 from .coordinator import PaseoCoordinator
-from .entity import PaseoEntity
+from .entity import PaseoEntity, PaseoRunEntity, ensure_hub_device, run_unique_id
 
 PARALLEL_UPDATES = 0  # read-only entities fed by pushes
 
@@ -38,6 +38,29 @@ async def async_setup_entry(
             *(PaseoProgressSensor(coordinator, d) for d in PROGRESS_SENSORS),
         ]
     )
+
+    live: dict[str, PaseoRunEntity] = {}  # unique id -> entity added by this setup
+
+    @callback
+    def _add_new_runs() -> None:
+        """Add the run sensors that are not live yet: new runs, and ones the user deleted. Gone runs keep theirs."""
+        hub_id: str | None = None
+        entities: list[PaseoRunSensor] = []
+        for key in payload.run_keys(coordinator.data):
+            for description in RUN_SENSORS:
+                if run_unique_id(coordinator.instance_id, key, description.key) in live:
+                    continue
+                hub_id = hub_id or ensure_hub_device(hass, coordinator)
+                worktree = payload.worktree(coordinator.data, key)
+                entity = PaseoRunSensor(coordinator, key, worktree, hub_id, description)
+                entity.live = live
+                live[entity.unique_id] = entity
+                entities.append(entity)
+        if entities:
+            async_add_entities(entities)
+
+    _add_new_runs()
+    entry.async_on_unload(coordinator.async_add_listener(_add_new_runs))
 
 
 class PaseoHeldQuestionsSensor(PaseoEntity, SensorEntity):
@@ -256,3 +279,108 @@ class PaseoProgressSensor(PaseoEntity, SensorEntity):
     def extra_state_attributes(self) -> dict[str, Any]:
         """Return the attributes computed from the last payload."""
         return self.entity_description.attrs_fn(self.coordinator.data or {})
+
+
+def _run_active_ticket_attrs(view: Mapping[str, Any]) -> dict[str, Any]:
+    ticket = payload.run_of(view).get("active_ticket")
+    if not isinstance(ticket, dict) or not ticket.get("id"):
+        return {}
+    return {k: ticket.get(k) for k in ("id", "title", "stage", "elapsed_min", "estimate_min")}
+
+
+def _run_active_ticket_value(view: Mapping[str, Any]) -> str | None:
+    ticket = payload.run_of(view).get("active_ticket")
+    if not isinstance(ticket, dict) or not ticket.get("id"):
+        return None
+    return str(ticket["id"])[: payload.MAX_STATE_LENGTH]
+
+
+# The entity name decides the entity id: sensor.paseo_<worktree>_<name>.
+RUN_SENSORS: tuple[PaseoSensorDescription, ...] = (
+    PaseoSensorDescription(
+        key="project_progress",
+        translation_key="project_progress",
+        native_unit_of_measurement=PERCENTAGE,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda view: payload.eta_number(view, "progress_pct"),
+    ),
+    PaseoSensorDescription(
+        key="project_calibrated_eta",
+        translation_key="project_calibrated_eta",
+        device_class=SensorDeviceClass.DURATION,
+        native_unit_of_measurement=UnitOfTime.MINUTES,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda view: payload.eta_number(view, "calibrated_eta_min"),
+        attrs_fn=_calibrated_attrs,
+    ),
+    PaseoSensorDescription(
+        key="project_calibrated_finish",
+        translation_key="project_calibrated_finish",
+        device_class=SensorDeviceClass.TIMESTAMP,
+        value_fn=payload.finish_at,
+    ),
+    PaseoSensorDescription(
+        key="project_active_ticket",
+        translation_key="project_active_ticket",
+        value_fn=_run_active_ticket_value,
+        attrs_fn=_run_active_ticket_attrs,
+    ),
+    PaseoSensorDescription(
+        key="project_open_questions",
+        translation_key="project_open_questions",
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda view: payload.run_count(view, "open_questions"),
+        attrs_fn=lambda view: {"questions": payload.run_listed(view, "open_questions")},
+    ),
+    PaseoSensorDescription(
+        key="project_stuck",
+        translation_key="project_stuck",
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda view: payload.run_count(view, "stuck"),
+        attrs_fn=lambda view: {"items": payload.run_listed(view, "stuck")},
+    ),
+    PaseoSensorDescription(
+        key="project_deliverables",
+        translation_key="project_deliverables",
+        value_fn=lambda view: payload.deliverables(view)[0],
+        attrs_fn=lambda view: {"items": payload.deliverables(view)[1]},
+    ),
+    PaseoSensorDescription(
+        key="project_last_update",
+        translation_key="project_last_update",
+        device_class=SensorDeviceClass.TIMESTAMP,
+        value_fn=payload.run_last_update,
+    ),
+)
+
+
+class PaseoRunSensor(PaseoRunEntity, SensorEntity):
+    """A sensor of one run; the description's functions read the run view."""
+
+    entity_description: PaseoSensorDescription
+    _unrecorded_attributes = frozenset({"items", "questions"})
+
+    def __init__(
+        self,
+        coordinator: PaseoCoordinator,
+        run_key: str,
+        worktree: str,
+        hub_id: str,
+        description: PaseoSensorDescription,
+    ) -> None:
+        """Create the sensor."""
+        super().__init__(coordinator, run_key, description.key, worktree, hub_id)
+        self.entity_description = description
+
+    @property
+    def native_value(self) -> str | int | float | datetime | None:
+        """Return the value computed from the run."""
+        view = self.run_view
+        return self.entity_description.value_fn(view) if view else None
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return the run's key and worktree and the description's attributes."""
+        view = self.run_view
+        attrs = self.entity_description.attrs_fn(view) if view else {}
+        return {**attrs, **self.run_attributes()}

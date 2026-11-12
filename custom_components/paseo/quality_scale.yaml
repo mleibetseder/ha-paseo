@@ -43,6 +43,12 @@ rules:
   test-coverage: done
   # Gold, only what is implemented
   diagnostics: done
+  dynamic-devices:
+    status: done
+    comment: A new run key in a push adds the entities of its own device.
+  stale-devices:
+    status: done
+    comment: Entities of a run that left the payload turn unavailable; its device can be deleted once the run is gone.
   entity-translations: done
   exception-translations: done
   icon-translations: done

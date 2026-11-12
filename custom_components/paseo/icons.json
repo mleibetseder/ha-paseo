@@ -18,6 +18,12 @@
         "state": {
           "on": "mdi:robot-happy"
         }
+      },
+      "project_working": {
+        "default": "mdi:robot-outline",
+        "state": {
+          "on": "mdi:robot-happy"
+        }
       }
     },
     "sensor": {
@@ -68,6 +74,30 @@
           "queued": "mdi:timer-sand",
           "blocked": "mdi:block-helper"
         }
+      },
+      "project_progress": {
+        "default": "mdi:progress-check"
+      },
+      "project_calibrated_eta": {
+        "default": "mdi:timer-sand"
+      },
+      "project_calibrated_finish": {
+        "default": "mdi:flag-checkered"
+      },
+      "project_active_ticket": {
+        "default": "mdi:ticket-outline"
+      },
+      "project_open_questions": {
+        "default": "mdi:help-circle-outline"
+      },
+      "project_stuck": {
+        "default": "mdi:alert-octagon-outline"
+      },
+      "project_deliverables": {
+        "default": "mdi:package-variant-closed"
+      },
+      "project_last_update": {
+        "default": "mdi:clock-outline"
       }
     }
   },

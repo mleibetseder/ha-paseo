@@ -53,7 +53,7 @@ The texts are available in English and German.
 
 ## Entities
 
-All entities belong to one device, **Paseo**. State entities are unavailable until the first push and once the data is stale (no push for twice the announced interval).
+The aggregate entities belong to the hub device, **Paseo**. State entities are unavailable until the first push and once the data is stale (no push for twice the announced interval).
 
 | Entity | State |
 |---|---|
@@ -74,6 +74,23 @@ All entities belong to one device, **Paseo**. State entities are unavailable unt
 | `sensor.paseo_ci_queue` | `idle`, `running`, `queued` or `blocked` |
 
 Details are in the entity attributes.
+
+### Per-run devices
+
+Every Paseo run gets its own device, **Paseo \<worktree\>**, linked to the hub. Its entities carry the worktree name, for example `sensor.paseo_<worktree>_progress` for a worktree called `my-project`:
+
+| Entity | State |
+|---|---|
+| `sensor.paseo_<worktree>_progress` | progress of the run in % |
+| `sensor.paseo_<worktree>_calibrated_eta`, `sensor.paseo_<worktree>_calibrated_finish` | calibrated minutes left, finish time |
+| `sensor.paseo_<worktree>_active_ticket` | id of the working ticket |
+| `sensor.paseo_<worktree>_open_questions` | number of open questions |
+| `sensor.paseo_<worktree>_stuck` | number of stuck tickets |
+| `sensor.paseo_<worktree>_deliverables` | number of deliverables |
+| `sensor.paseo_<worktree>_last_update` | time of the last update of the run |
+| `binary_sensor.paseo_<worktree>_working` | on while the run is working |
+
+New runs appear with the push that brings them. A run that is gone becomes unavailable and its device can be deleted; the device comes back if the run returns. When two worktrees have the same name, Home Assistant adds its usual `_2` suffix to the second set of entity ids.
 
 ## Services
 
