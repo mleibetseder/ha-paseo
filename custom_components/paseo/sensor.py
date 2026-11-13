@@ -178,6 +178,14 @@ PROGRESS_SENSORS: tuple[PaseoSensorDescription, ...] = (
         attrs_fn=lambda data: {"agents": payload.agents(data)[1]},
     ),
     PaseoSensorDescription(
+        key="open_agents",
+        translation_key="open_agents",
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda data: (payload.open_agents(data) or (None,))[0],
+        attrs_fn=lambda data: {"agents": (payload.open_agents(data) or (0, []))[1]},
+        available_fn=lambda data: payload.open_agents(data) is not None,
+    ),
+    PaseoSensorDescription(
         key="quota_waiting",
         translation_key="quota_waiting",
         state_class=SensorStateClass.MEASUREMENT,
@@ -262,6 +270,10 @@ class PaseoProgressSensor(PaseoEntity, SensorEntity):
         """Create the sensor."""
         super().__init__(coordinator, description.key)
         self.entity_description = description
+        if description.key == "active_agents":
+            # Renamed "Busy agents", but a fresh install keeps the id sensor.paseo_active_agents. Only a suggestion:
+            # an existing registry entry, and an id the user renamed, win over it.
+            self.entity_id = "sensor.paseo_active_agents"
 
     @property
     def available(self) -> bool:

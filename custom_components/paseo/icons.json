@@ -33,6 +33,9 @@
       "active_agents": {
         "default": "mdi:robot"
       },
+      "open_agents": {
+        "default": "mdi:robot-outline"
+      },
       "current_activity": {
         "default": "mdi:text-box-outline"
       },

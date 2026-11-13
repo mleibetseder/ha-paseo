@@ -7,7 +7,7 @@ fields out. A missing or malformed section reads as empty, never as an error.
 from __future__ import annotations
 
 from collections.abc import Mapping
-from datetime import datetime
+from datetime import datetime, timedelta
 import hashlib
 import json
 import math
@@ -194,12 +194,51 @@ def agents(data: Mapping[str, Any] | None) -> tuple[int, list[dict[str, Any]]]:
     return _count(section.get("count"), len(items)), items[:MAX_ATTRIBUTE_ITEMS]
 
 
-def working(data: Mapping[str, Any] | None) -> bool:
+def open_agents(data: Mapping[str, Any] | None) -> tuple[int, list[dict[str, Any]]] | None:
+    """Number of open agents (also those beyond the list cap) and the listed ones; None when the plugin does not send agents.open (older plugin)."""
+    section = _section(_section(data, "agents"), "open")
+    if (
+        not section
+        or isinstance(section.get("count"), bool)
+        or not isinstance(section.get("count"), int)
+    ):
+        return None
+    items = _dicts(section.get("items"))
+    return _count(section.get("count"), len(items)), items[:MAX_ATTRIBUTE_ITEMS]
+
+
+WORKING_WINDOW = timedelta(
+    minutes=60
+)  # a project counts as working only while its last update is this recent
+
+
+def project_working(data: Mapping[str, Any] | None, now: datetime | None = None) -> bool:
+    """True when a non-idle project in the overview has working: true and was updated within WORKING_WINDOW.
+
+    The window keeps a stopped run (its progress file still says working) from staying on for days.
+    """
+    now = now or dt_util.utcnow()
+    for project in overview(data):
+        if is_idle(project) or project.get("working") is not True:
+            continue
+        value = project.get("last_update")
+        updated = dt_util.parse_datetime(value) if isinstance(value, str) else None
+        if updated is not None and updated.tzinfo is not None and now - updated <= WORKING_WINDOW:
+            return True
+    return False
+
+
+def busy(data: Mapping[str, Any] | None) -> bool:
     """True while any agent is mid-turn; falls back to the agent count for a payload without the flag."""
     value = (data or {}).get("working")
     if isinstance(value, bool):
         return value
     return agents(data)[0] > 0
+
+
+def working(data: Mapping[str, Any] | None, now: datetime | None = None) -> bool:
+    """On while an agent is busy or a project is working (see project_working)."""
+    return busy(data) or project_working(data, now)
 
 
 def quota(data: Mapping[str, Any] | None) -> tuple[int, datetime | None, list[dict[str, Any]]]:

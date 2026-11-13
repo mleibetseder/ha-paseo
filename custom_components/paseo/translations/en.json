@@ -66,7 +66,10 @@
         "name": "Last push"
       },
       "active_agents": {
-        "name": "Active agents"
+        "name": "Busy agents"
+      },
+      "open_agents": {
+        "name": "Open agents"
       },
       "current_activity": {
         "name": "Current activity"

@@ -100,7 +100,7 @@ class PaseoNeedsAttentionSensor(PaseoEntity, BinarySensorEntity):
 
 
 class PaseoAgentWorkingSensor(PaseoEntity, BinarySensorEntity):
-    """On while any agent is mid-turn; unavailable while the data is stale."""
+    """On while an agent is busy or a recently updated project is working; unavailable while the data is stale."""
 
     _attr_device_class = BinarySensorDeviceClass.RUNNING
 
@@ -110,7 +110,7 @@ class PaseoAgentWorkingSensor(PaseoEntity, BinarySensorEntity):
 
     @property
     def is_on(self) -> bool:
-        """True while the payload reports a running turn."""
+        """True while the payload reports a running turn, or a non-idle project works and was updated within the last hour."""
         return payload.working(self.coordinator.data)
 
 

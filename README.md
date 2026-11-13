@@ -59,9 +59,10 @@ The aggregate entities belong to the hub device, **Paseo**. State entities are u
 |---|---|
 | `binary_sensor.paseo_bridge_online` | on while pushes keep arriving (diagnostic) |
 | `sensor.paseo_last_push` | time of the last accepted push (diagnostic) |
-| `binary_sensor.paseo_agent_working` | on while any agent is mid-turn |
+| `binary_sensor.paseo_agent_working` | on while an agent is busy or a non-idle project works (updated within 60 minutes) |
 | `binary_sensor.paseo_needs_attention` | on when a run is stuck, a ticket is overdue, a question blocks or an agent waits for a permission |
-| `sensor.paseo_active_agents` | number of agents mid-turn |
+| `sensor.paseo_active_agents` | number of busy agents (mid-turn), named "Busy agents" |
+| `sensor.paseo_open_agents` | number of open agents (running or idle); unavailable with an older plugin |
 | `sensor.paseo_current_activity` | what the agent is doing now |
 | `sensor.paseo_active_ticket` | id of the working ticket |
 | `sensor.paseo_run_progress` | progress of the most recent run in % |
