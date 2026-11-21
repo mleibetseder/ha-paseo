@@ -10,9 +10,6 @@ import aiohttp
 from .const import SCHEMA_VERSION
 
 REQUEST_TIMEOUT = aiohttp.ClientTimeout(total=10)
-# An answer waits for the plugin to message the agent (the plugin gives up after 25 s).
-ANSWER_TIMEOUT = aiohttp.ClientTimeout(total=30)
-
 
 # A resume asks usage-auto-resume once per job and waits for each answer (the plugin answers within 25 s).
 RESUME_BASE_TIMEOUT = 30
@@ -38,11 +35,11 @@ class PaseoConnectionError(PaseoError):
 
 
 class PaseoRejectedError(PaseoError):
-    """The plugin refused a question answer; `status` and `code` come from its error body."""
+    """The plugin refused a request; `status` and `code` come from its error body."""
 
     def __init__(self, status: int, code: str | None) -> None:
         """Keep the HTTP status and the plugin's error code."""
-        super().__init__(f"Answer refused: HTTP {status} {code}")
+        super().__init__(f"Request refused: HTTP {status} {code}")
         self.status = status
         self.code = code
 
@@ -69,8 +66,8 @@ class PaseoSchemaError(PaseoError):
     """The plugin does not support this contract version."""
 
 
-# Statuses the answer route uses for refusals (REST API contract).
-ANSWER_REFUSALS = frozenset({400, 404, 409, 502, 503})
+# Statuses the plugin routes use for refusals (REST API contract).
+REFUSALS = frozenset({400, 404, 409, 502, 503})
 
 
 async def _error_body(response: aiohttp.ClientResponse) -> dict[str, Any]:
@@ -114,7 +111,7 @@ class PaseoBridgeClient:
                     raise PaseoAuthError("The bridge token was rejected")
                 if response.status == HTTPStatus.INTERNAL_SERVER_ERROR:
                     raise PaseoServerError("The plugin failed with HTTP 500")
-                if refusals and response.status in ANSWER_REFUSALS:
+                if refusals and response.status in REFUSALS:
                     code = (await _error_body(response)).get("error")
                     raise PaseoRejectedError(
                         response.status, code if isinstance(code, str) else None
@@ -166,38 +163,6 @@ class PaseoBridgeClient:
     async def unregister(self) -> dict[str, Any]:
         """Tell the plugin to forget the webhook and stop pushing."""
         return await self._request("POST", "/v1/unregister", auth=True)
-
-    async def answer_question(
-        self,
-        worktree: str,
-        question_id: str,
-        choice: str,
-        words: str | None = None,
-        fingerprint: str | None = None,
-    ) -> dict[str, Any]:
-        """Answer an open question; return the plugin's {ok, recorded, ...} body.
-
-        Raises PaseoRejectedError for 400/404/409 (the input) and 502/503 (the agent could
-        not be told, so nothing is recorded and the answer can be sent again), PaseoAuthError
-        for 401.
-        """
-        body: dict[str, Any] = {
-            "worktree": worktree,
-            "questionId": question_id,
-            "choice": choice,
-        }
-        if words:
-            body["words"] = words
-        if fingerprint:
-            body["fingerprint"] = fingerprint
-        return await self._request(
-            "POST",
-            "/v1/questions/answer",
-            auth=True,
-            json=body,
-            refusals=True,
-            timeout=ANSWER_TIMEOUT,
-        )
 
     async def resume_quota(self, agent_id: str, jobs: int = 1) -> dict[str, Any]:
         """Ask usage-auto-resume to resume one agent, or all ("all"), now.

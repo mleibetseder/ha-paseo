@@ -18,12 +18,6 @@
         "state": {
           "on": "mdi:robot-happy"
         }
-      },
-      "project_working": {
-        "default": "mdi:robot-outline",
-        "state": {
-          "on": "mdi:robot-happy"
-        }
       }
     },
     "sensor": {
@@ -36,38 +30,8 @@
       "open_agents": {
         "default": "mdi:robot-outline"
       },
-      "current_activity": {
-        "default": "mdi:text-box-outline"
-      },
-      "active_ticket": {
-        "default": "mdi:ticket-outline"
-      },
-      "run_progress": {
-        "default": "mdi:progress-check"
-      },
-      "raw_eta": {
-        "default": "mdi:timer-sand"
-      },
-      "calibrated_eta": {
-        "default": "mdi:timer-check-outline"
-      },
-      "calibrated_finish": {
-        "default": "mdi:flag-checkered"
-      },
-      "deliverables_count": {
-        "default": "mdi:package-variant-closed"
-      },
-      "open_questions": {
-        "default": "mdi:comment-question-outline"
-      },
-      "projects_overview": {
-        "default": "mdi:folder-multiple-outline"
-      },
       "quota_waiting": {
         "default": "mdi:gauge-empty"
-      },
-      "held_questions": {
-        "default": "mdi:bell-sleep-outline"
       },
       "ci_queue": {
         "default": "mdi:server-network",
@@ -77,42 +41,12 @@
           "queued": "mdi:timer-sand",
           "blocked": "mdi:block-helper"
         }
-      },
-      "project_progress": {
-        "default": "mdi:progress-check"
-      },
-      "project_calibrated_eta": {
-        "default": "mdi:timer-sand"
-      },
-      "project_calibrated_finish": {
-        "default": "mdi:flag-checkered"
-      },
-      "project_active_ticket": {
-        "default": "mdi:ticket-outline"
-      },
-      "project_open_questions": {
-        "default": "mdi:help-circle-outline"
-      },
-      "project_stuck": {
-        "default": "mdi:alert-octagon-outline"
-      },
-      "project_deliverables": {
-        "default": "mdi:package-variant-closed"
-      },
-      "project_last_update": {
-        "default": "mdi:clock-outline"
       }
     }
   },
   "services": {
     "resume_quota_agent": {
       "service": "mdi:play-speed"
-    },
-    "answer_question": {
-      "service": "mdi:comment-check-outline"
-    },
-    "get_morning_brief": {
-      "service": "mdi:weather-sunset-up"
     },
     "cancel_ci_run": {
       "service": "mdi:cancel"

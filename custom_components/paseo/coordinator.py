@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
@@ -15,18 +15,15 @@ from homeassistant.util import dt as dt_util
 from .api import PaseoBridgeClient
 from .const import ALLOWED_NEXT_PUSH_S, DOMAIN, SCHEMA_VERSION, STALE_FACTOR
 
-if TYPE_CHECKING:
-    from .notifier import QuestionNotifier
-
 _LOGGER = logging.getLogger(__name__)
 
 
 def valid_payload(payload: Any, instance_id: str | None) -> bool:
-    """Check the envelope: schema 1, our instance, positive next_push_by_s, parsable pushed_at."""
+    """Check the envelope: schema 2, our instance, positive next_push_by_s, parsable pushed_at."""
     if not isinstance(payload, dict):
         return False
     schema = payload.get("schema")
-    # Python treats True == 1 and 1.0 == 1; the schema says the integer 1.
+    # Python treats True == 1 and 1.0 == 1; the schema says the integer 2.
     if type(schema) is not int or schema != SCHEMA_VERSION:
         return False
     if instance_id is not None and payload.get("instance_id") != instance_id:
@@ -61,7 +58,6 @@ class PaseoCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self.last_update_success = False
         self._stale_unsub: CALLBACK_TYPE | None = None
         self._stale_logged = False
-        self.notifier: QuestionNotifier | None = None
 
     @property
     def last_push(self) -> datetime | None:
@@ -74,7 +70,7 @@ class PaseoCoordinator(DataUpdateCoordinator[dict[str, Any]]):
     def async_handle_push(self, payload: Any) -> bool:
         """Accept a webhook payload; return False when it is ignored."""
         if not valid_payload(payload, self.instance_id):
-            _LOGGER.debug("Ignoring a payload that is not a valid schema 1 envelope")
+            _LOGGER.debug("Ignoring a payload that is not a valid schema 2 envelope")
             return False
         self._cancel_stale_timer()
         if self._stale_logged:

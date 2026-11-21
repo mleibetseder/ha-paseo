@@ -56,9 +56,6 @@
       },
       "agent_working": {
         "name": "Agent working"
-      },
-      "project_working": {
-        "name": "Working"
       }
     },
     "sensor": {
@@ -71,38 +68,8 @@
       "open_agents": {
         "name": "Open agents"
       },
-      "current_activity": {
-        "name": "Current activity"
-      },
-      "active_ticket": {
-        "name": "Active ticket"
-      },
-      "run_progress": {
-        "name": "Run progress"
-      },
-      "raw_eta": {
-        "name": "Raw ETA"
-      },
-      "calibrated_eta": {
-        "name": "Calibrated ETA"
-      },
-      "calibrated_finish": {
-        "name": "Calibrated finish"
-      },
-      "deliverables_count": {
-        "name": "Deliverables"
-      },
-      "open_questions": {
-        "name": "Open questions"
-      },
-      "projects_overview": {
-        "name": "Projects overview"
-      },
       "quota_waiting": {
         "name": "Quota waiting"
-      },
-      "held_questions": {
-        "name": "Held questions"
       },
       "ci_queue": {
         "name": "CI queue",
@@ -126,30 +93,6 @@
             "name": "Runs"
           }
         }
-      },
-      "project_progress": {
-        "name": "Progress"
-      },
-      "project_calibrated_eta": {
-        "name": "Calibrated ETA"
-      },
-      "project_calibrated_finish": {
-        "name": "Calibrated finish"
-      },
-      "project_active_ticket": {
-        "name": "Active ticket"
-      },
-      "project_open_questions": {
-        "name": "Open questions"
-      },
-      "project_stuck": {
-        "name": "Stuck"
-      },
-      "project_deliverables": {
-        "name": "Deliverables"
-      },
-      "project_last_update": {
-        "name": "Last update"
       }
     }
   },
@@ -162,46 +105,6 @@
           "name": "Agent ID",
           "description": "The agent to resume, or \"all\" for every agent that waits for its quota."
         },
-        "config_entry_id": {
-          "name": "Paseo entry",
-          "description": "The Paseo entry to use. Only needed when more than one is configured."
-        }
-      }
-    },
-    "answer_question": {
-      "name": "Answer question",
-      "description": "Answers an open Paseo question the way the Progress panel does: records the answer in the progress file and tells the agent that asked.",
-      "fields": {
-        "worktree": {
-          "name": "Worktree",
-          "description": "The worktree key of the question, such as myproject-1a2b3c4d (the key of the open question in the push)."
-        },
-        "question_id": {
-          "name": "Question ID",
-          "description": "The question to answer, such as Q1."
-        },
-        "choice": {
-          "name": "Choice",
-          "description": "The letter of the option you pick."
-        },
-        "words": {
-          "name": "Your words",
-          "description": "Optional text quoted under the answer, up to 2000 characters."
-        },
-        "config_entry_id": {
-          "name": "Paseo entry",
-          "description": "The Paseo entry to use. Only needed when more than one is configured."
-        },
-        "fingerprint": {
-          "name": "Fingerprint",
-          "description": "Optional: the 8-character fingerprint of the question you saw. The answer is refused when the question under that id has changed since."
-        }
-      }
-    },
-    "get_morning_brief": {
-      "name": "Get morning brief",
-      "description": "Returns the questions held during bedtime and the open blocking ones, with a ready-made text line for a morning announcement.",
-      "fields": {
         "config_entry_id": {
           "name": "Paseo entry",
           "description": "The Paseo entry to use. Only needed when more than one is configured."
@@ -248,39 +151,6 @@
     "rpc_failed": {
       "message": "usage-auto-resume did not answer the resume request."
     },
-    "invalid_choice": {
-      "message": "That letter is not one of the question's options."
-    },
-    "invalid_words": {
-      "message": "Your words are longer than 2000 characters."
-    },
-    "unknown_worktree": {
-      "message": "The plugin does not know that worktree."
-    },
-    "unknown_question": {
-      "message": "That question is not open in the latest run of the worktree."
-    },
-    "already_answered": {
-      "message": "That question was answered already."
-    },
-    "answer_in_progress": {
-      "message": "The Progress panel is sending an answer for that question right now. Try again in a moment."
-    },
-    "answer_rejected": {
-      "message": "The Paseo plugin refused the answer."
-    },
-    "answer_agent_unreachable": {
-      "message": "The agent could not be reached, so the answer was not recorded. Try again."
-    },
-    "answer_daemon_unavailable": {
-      "message": "The plugin has no connection to the Paseo daemon, so the answer was not recorded. Try again in a moment."
-    },
-    "answers_off": {
-      "message": "Answering is switched off in the Progress plugin's settings."
-    },
-    "question_changed": {
-      "message": "That question changed since you saw it (a new run reused its id). Look at the current question and answer that."
-    },
     "unknown_run": {
       "message": "The CI plugin has no run {run_id}."
     },
@@ -292,40 +162,6 @@
     },
     "plugin_error": {
       "message": "The Paseo plugin failed to handle the request. Check its log."
-    }
-  },
-  "options": {
-    "step": {
-      "init": {
-        "title": "Question notifications",
-        "description": "Which phones get the question pushes, and when to stay quiet.",
-        "data": {
-          "notify_targets": "Phones to notify",
-          "bedtime_entity": "Bedtime entity",
-          "reminder_minutes": "Reminder after (minutes)",
-          "quiet_hold": "While bedtime is on"
-        },
-        "data_description": {
-          "notify_targets": "The notify.mobile_app_* services of your phones. Re-open this page if a phone was registered again.",
-          "bedtime_entity": "When this entity is on, questions are held as set below and no reminder is sent. Leave empty to use input_boolean.bedtime if it exists.",
-          "reminder_minutes": "Send one reminder when a blocking question is still open after this many minutes. 0 turns reminders off.",
-          "quiet_hold": "Held questions raise no push; they stay in the held list and the morning brief until they are answered."
-        }
-      }
-    }
-  },
-  "selector": {
-    "quiet_hold": {
-      "options": {
-        "hold_non_blocking": "Hold questions that do not block the agent",
-        "hold_all": "Hold all questions",
-        "never": "Never hold"
-      }
-    }
-  },
-  "device": {
-    "project": {
-      "name": "Paseo {worktree}"
     }
   }
 }

@@ -10,27 +10,12 @@ import voluptuous as vol
 
 from homeassistant.components import webhook
 from homeassistant.config_entries import (
-    ConfigEntry,
     ConfigFlow,
     ConfigFlowResult,
-    OptionsFlowWithReload,
 )
-from homeassistant.core import callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.network import NoURLAvailableError
-from homeassistant.helpers.selector import (
-    EntitySelector,
-    EntitySelectorConfig,
-    NumberSelector,
-    NumberSelectorConfig,
-    NumberSelectorMode,
-    SelectSelector,
-    SelectSelectorConfig,
-    SelectSelectorMode,
-    TextSelector,
-    TextSelectorConfig,
-    TextSelectorType,
-)
+from homeassistant.helpers.selector import TextSelector, TextSelectorConfig, TextSelectorType
 
 from .api import (
     PaseoAuthError,
@@ -38,22 +23,7 @@ from .api import (
     PaseoConnectionError,
     PaseoSchemaError,
 )
-from .const import (
-    CONF_BEDTIME_ENTITY,
-    CONF_NOTIFY_TARGETS,
-    CONF_QUIET_HOLD,
-    CONF_REMINDER_MINUTES,
-    CONF_TOKEN,
-    CONF_URL,
-    CONF_WEBHOOK_ID,
-    DEFAULT_BEDTIME_ENTITY,
-    DEFAULT_REMINDER_MINUTES,
-    DOMAIN,
-    QUIET_HOLD_MODES,
-    QUIET_HOLD_NON_BLOCKING,
-    SCHEMA_VERSION,
-)
-from .notifier import discover_targets
+from .const import CONF_TOKEN, CONF_URL, CONF_WEBHOOK_ID, DOMAIN, SCHEMA_VERSION
 from .webhook import async_internal_url
 
 _LOGGER = logging.getLogger(__name__)
@@ -74,12 +44,6 @@ class PaseoConfigFlow(ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Paseo."""
 
     VERSION = 1
-
-    @staticmethod
-    @callback
-    def async_get_options_flow(config_entry: ConfigEntry) -> PaseoOptionsFlow:
-        """Notification options."""
-        return PaseoOptionsFlow()
 
     async def _probe(self, url: str, token: str) -> tuple[PaseoBridgeClient, str]:
         """health (no auth) then whoami (auth); return the client and the instanceId."""
@@ -187,62 +151,3 @@ class PaseoConfigFlow(ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema({vol.Required(CONF_TOKEN): _TOKEN}),
             errors=errors,
         )
-
-
-class PaseoOptionsFlow(OptionsFlowWithReload):
-    """Notification targets, bedtime entity, reminder and quiet-hours behaviour."""
-
-    async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
-        """Choose how question notifications behave; the entry reloads on save."""
-        if user_input is not None:
-            return self.async_create_entry(data=user_input)
-
-        options = self.config_entry.options
-        found = discover_targets(self.hass)
-        stored = list(options.get(CONF_NOTIFY_TARGETS, found))
-        # Keep a stored target that is gone right now selectable, so saving does not drop it silently.
-        choices = sorted({*found, *stored})
-        bedtime = options.get(CONF_BEDTIME_ENTITY) or (
-            DEFAULT_BEDTIME_ENTITY if self.hass.states.get(DEFAULT_BEDTIME_ENTITY) else None
-        )
-        schema = vol.Schema(
-            {
-                vol.Required(CONF_NOTIFY_TARGETS, default=stored): SelectSelector(
-                    SelectSelectorConfig(
-                        options=choices, multiple=True, mode=SelectSelectorMode.DROPDOWN
-                    )
-                ),
-                vol.Optional(
-                    CONF_BEDTIME_ENTITY,
-                    description={"suggested_value": bedtime},
-                ): EntitySelector(
-                    EntitySelectorConfig(domain=["input_boolean", "binary_sensor", "switch"])
-                ),
-                vol.Required(
-                    CONF_REMINDER_MINUTES,
-                    default=options.get(CONF_REMINDER_MINUTES, DEFAULT_REMINDER_MINUTES),
-                ): vol.All(
-                    NumberSelector(
-                        NumberSelectorConfig(
-                            min=0,
-                            max=1440,
-                            step=1,
-                            mode=NumberSelectorMode.BOX,
-                            unit_of_measurement="min",
-                        )
-                    ),
-                    vol.Coerce(int),
-                ),
-                vol.Required(
-                    CONF_QUIET_HOLD,
-                    default=options.get(CONF_QUIET_HOLD, QUIET_HOLD_NON_BLOCKING),
-                ): SelectSelector(
-                    SelectSelectorConfig(
-                        options=list(QUIET_HOLD_MODES),
-                        translation_key=CONF_QUIET_HOLD,
-                        mode=SelectSelectorMode.LIST,
-                    )
-                ),
-            }
-        )
-        return self.async_show_form(step_id="init", data_schema=schema)

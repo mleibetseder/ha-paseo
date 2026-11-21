@@ -44,11 +44,13 @@ rules:
   # Gold, only what is implemented
   diagnostics: done
   dynamic-devices:
-    status: done
-    comment: A new run key in a push adds the entities of its own device.
+    status: exempt
+    comment: >-
+      One hub device; devices do not come and go. Per-run devices were removed in 0.4.0
+      and setup deletes the ones an older version left behind.
   stale-devices:
-    status: done
-    comment: Entities of a run that left the payload turn unavailable; its device can be deleted once the run is gone.
+    status: exempt
+    comment: One hub device that never goes stale.
   entity-translations: done
   exception-translations: done
   icon-translations: done
